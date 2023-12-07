@@ -147,6 +147,21 @@ public class RegisterActivity extends AppCompatActivity {
                     if(in.toString()=="-1"){
                         throw new RuntimeException() ;
                     }
+                    out = new OutputStreamWriter(socket.getOutputStream());
+                    out.write("CREATE TABLE "+login+"_order (" +
+                            "product_id varchar(48) NOT null primary key," +
+                            "title varchar(256) NOT NULL," +
+                            "price float4 NULL DEFAULT 0.00," +
+                            "lot int4 NULL DEFAULT 0" +
+                            ");");
+                    out.flush();
+                    in = new InputStreamReader(socket.getInputStream());
+                    buf = new BufferedReader(in);
+                    String response2 = buf.readLine();
+                    //String response2 = buf.readLine();
+                    if(in.toString()=="-1"){
+                        throw new RuntimeException() ;
+                    }
                     socket.close();
 
                 } catch (Exception ex) {

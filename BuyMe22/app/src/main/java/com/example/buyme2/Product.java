@@ -11,8 +11,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class Product {
+public class Product extends AtomicReference<Product> {
     private static String Response;
     public int ID;
     public double Price;

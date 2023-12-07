@@ -22,12 +22,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoginActivity extends AppCompatActivity {
     public static String host = "82.179.140.18";
     public static int port = 45146;
     public static String password;
-    public static String login;
+    public String login;
+    public static AtomicReference<String> Login;
     public static String username;
 
     private Button loginButton;
@@ -70,7 +72,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void LoginAccount() {
-        login = loginInput.getText().toString();
+        login =loginInput.getText().toString();
+        Login=new AtomicReference<String>(login);
         password = passwordInput.getText().toString();
         if (TextUtils.isEmpty(login)) {
             Toast.makeText(this, "Введите логин", Toast.LENGTH_SHORT).show();
@@ -136,15 +139,30 @@ public class LoginActivity extends AppCompatActivity {
                         public void run() {
                             String[] log = Response.split("\t");
                             String logname, logpass;
-                            logname = log[0].substring(0);
+                            logname = log[0];
                             logpass = log[1];
+
+                            password = passwordInput.getText().toString();
+                            MessageDigest md = null;
+                            try {
+                                md = MessageDigest.getInstance("SHA-256");
+                            } catch (NoSuchAlgorithmException e) {
+                                throw new RuntimeException(e);
+                            }
+                            // Преобразуем пароль в байтовый массив и вычисляем хэш-значение
+                            byte[] hash = md.digest(password.getBytes());
+
+                            // Кодируем хэш-значение в Base64 и выводим на экран
+                            password = Base64.getEncoder().encodeToString(hash);
                             if (logpass.contentEquals(password)) {
 
                                 //Toast.makeText(this, "Вы ввели неверный пароль", Toast.LENGTH_SHORT).show();
                                 Intent ProductIntent = new Intent(LoginActivity.this, ProductActivity.class);
                                 startActivity(ProductIntent);
                             }
-                            else if(Response.contentEquals("\t\t\t")) {
+                            else {
+                                Intent ProductIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(ProductIntent);
                                 //Toast.makeText(this, "Такого пользователя не существует", Toast.LENGTH_SHORT).show();
                             }
                         }
