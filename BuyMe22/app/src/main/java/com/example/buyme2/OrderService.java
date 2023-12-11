@@ -1,9 +1,7 @@
 package com.example.buyme2;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -11,9 +9,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.List;
-
-public class OrderActivity extends AppCompatActivity {
+public class OrderService extends AppCompatActivity {
 
     private Button RemoveButton, AddButton, ExitButton, OrderButton;
     private TextView TextName, TextLot, TextPrice;
@@ -25,13 +21,13 @@ public class OrderActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        Product product = new Product();
-        id=1;
+       // Product product = new Product();
+        //id=1;
         //product.GetProductByID(id);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_main);
 
-        String order;
+        //String order;
         //AddButton=(Button) findViewById((R.id.add_btn));
         //RemoveButton=(Button) findViewById((R.id.remove_btn));
         OrderButton=(Button) findViewById((R.id.final_order_btn));
@@ -44,7 +40,7 @@ public class OrderActivity extends AppCompatActivity {
             public void onClick(View view) {
                     //При нажатии на текст переход к записи продукта
                     //ProductActivity.id=
-                    Intent ExitIntent=new Intent(OrderActivity.this,ProductActivity.class);
+                    Intent ExitIntent=new Intent(OrderService.this, ProductService.class);
                     startActivity(ExitIntent);
 
             }
@@ -63,7 +59,7 @@ public class OrderActivity extends AppCompatActivity {
         ExitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent ExitIntent=new Intent(OrderActivity.this,ProductActivity.class);
+                Intent ExitIntent=new Intent(OrderService.this, ProductService.class);
                 startActivity(ExitIntent);
             }
         });
@@ -91,8 +87,8 @@ public class OrderActivity extends AppCompatActivity {
     public void ListShow()
     {
 
-        String productData="";
-        Product product;
+        String productData= ProductService.order.Checking();
+        //Product product;
         /*for (int i=0;i<=order.size();i++)
         {
             product = order.get(i);

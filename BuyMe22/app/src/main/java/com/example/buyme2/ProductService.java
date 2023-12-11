@@ -4,32 +4,25 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ViewFlipper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class ProductActivity extends AppCompatActivity {
+public class ProductService extends AppCompatActivity {
 
     //public AtomicIntegerArray order[];
     AtomicReference<Product> product;
+    public static Order order;
     //public static Product [] BuyList;
     public static String BuyList ="";
     //public static float Sum;
@@ -47,7 +40,7 @@ public class ProductActivity extends AppCompatActivity {
         GetProduct();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_products);
-
+        order=new Order();
         BuyButton=(Button) findViewById((R.id.buy_btn));
         ListButton=(Button) findViewById((R.id.list_btn));
         ExitButton=(Button) findViewById((R.id.exit_btn));
@@ -56,7 +49,7 @@ public class ProductActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-               Intent OrderIntent=new Intent(ProductActivity.this,OrderActivity.class);
+               Intent OrderIntent=new Intent(ProductService.this, OrderService.class);
                 //OrderIntent.putExtra("Score", BuyList);
                startActivity(OrderIntent);
             }
@@ -64,7 +57,7 @@ public class ProductActivity extends AppCompatActivity {
         ExitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent ExitIntent=new Intent(ProductActivity.this,MainActivity.class);
+                Intent ExitIntent=new Intent(ProductService.this,MainActivity.class);
                 startActivity(ExitIntent);
             }
         });
@@ -73,27 +66,42 @@ public class ProductActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Thread thrd =new Thread(new Runnable() {
+                Product p =product.get();
+                String name=p.Name;
+                Integer i =p.Lot+1;
+                Double price =p.Price;
+                order.Add(name,i,price);
+                p.Add();
+                /*Thread thrd =new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        InetSocketAddress sa = new InetSocketAddress(LoginActivity.host, LoginActivity.port);
+                        InetSocketAddress sa = new InetSocketAddress(LoginService.host, LoginService.port);
                         try {
                             Socket socket = new Socket();
                             socket.connect(sa, 5000);
                             OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+
                             Product p =product.get();
+                            out.write("select public."+ LoginService.Login+ "_order where product_id='" + p.ID + "'");
+                            out.flush();
+                            InputStreamReader in = new InputStreamReader(socket.getInputStream());
+                            BufferedReader buf = new BufferedReader(in);
+                            String response = buf.readLine();
+                            String response2 = buf.readLine();
+                            String [] log = response2.split("\t");
+                            p = new Product(id,Float.parseFloat(log[3]),log[2],log[1], Integer.parseInt(log[4]));
+                            product =new AtomicReference<Product>(p);
                             //получить кол-во продуктов с этим ид уже в корзине
                             if(p.Lot==0){
-                                out.write("insert into public."+LoginActivity.Login+ "_order (product_id, title, price, lot) values ('" +p.ID  + "','" + p.Name + "','" + p.Price + "','" + (p.Lot+1)+ "')");
+                                out.write("insert into public."+ LoginService.Login+ "_order (product_id, title, price, lot) values ('" +p.ID  + "','" + p.Name + "','" + p.Price + "','" + (p.Lot+1)+ "')");
                             }
                             else{
                                 p.Add();
                                 product=new AtomicReference<Product>(p);
-                                out.write("update public."+LoginActivity.Login+ "_order set lot '" +p.Lot+1  + "'where product_id='" + p.ID + "')");
+                                out.write("update public."+ LoginService.Login+ "_order set lot '" +p.Lot+1  + "' where product_id='" + p.ID + "')");
 
                             }
-                            out.flush();
-                            InputStreamReader in = new InputStreamReader(socket.getInputStream());
+                            /*InputStreamReader in = new InputStreamReader(socket.getInputStream());
                             BufferedReader buf = new BufferedReader(in);
                             String response = buf.readLine();
                             String response2 = buf.readLine();
@@ -109,7 +117,7 @@ public class ProductActivity extends AppCompatActivity {
                     }
 
 
-                }); thrd.start();
+                }); thrd.start();*/
                 //if(p.Lot==0){
                     //BuyList.add(p);
                     //BuyList[id]=p;
@@ -190,7 +198,7 @@ public class ProductActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                InetSocketAddress sa = new InetSocketAddress(LoginActivity.host, LoginActivity.port);
+                InetSocketAddress sa = new InetSocketAddress(LoginService.host, LoginService.port);
                 try {
                     Socket socket = new Socket();
                     socket.connect(sa, 5000);

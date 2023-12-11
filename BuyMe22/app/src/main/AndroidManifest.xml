@@ -17,16 +17,16 @@
         tools:targetApi="34">
 
         <activity
-            android:name=".RegisterActivity"
+            android:name=".RegisterService"
             android:exported="true" />
         <activity
-            android:name=".OrderActivity"
+            android:name=".OrderService"
             android:exported="true" />
         <activity
-            android:name=".ProductActivity"
+            android:name=".ProductService"
             android:exported="true" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".LoginService"
             android:exported="true" />
         <activity
             android:name="com.example.buyme2.MainActivity"

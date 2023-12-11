@@ -12,8 +12,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
@@ -21,17 +19,16 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginService extends AppCompatActivity {
     public static String host = "82.179.140.18";
     public static int port = 45146;
     public static String password;
     public String login;
     public static AtomicReference<String> Login;
     public static String username;
-
+    public static AtomicReference<String> messageLogin;
     private Button loginButton;
     private EditText loginInput;
     private Button loginBtn;
@@ -41,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText usernameInput, passwordInput;
     //private String login;
 
-    public LoginActivity() {
+    public LoginService() {
     }
 
     @Override
@@ -64,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent MainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent MainIntent = new Intent(LoginService.this, MainActivity.class);
                 startActivity(MainIntent);
                 ;
             }
@@ -103,12 +100,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
             } catch (Exception e) {
-                Intent ProductIntent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent ProductIntent = new Intent(LoginService.this, MainActivity.class);
                 startActivity(ProductIntent);
                 //throw new RuntimeException(e);
             }
 
-            Intent ProductIntent = new Intent(LoginActivity.this, ProductActivity.class);
+            Intent ProductIntent = new Intent(LoginService.this, ProductService.class);
             startActivity(ProductIntent);
         }
     }
@@ -132,6 +129,9 @@ public class LoginActivity extends AppCompatActivity {
                     InputStreamReader in = new InputStreamReader(socket.getInputStream());
                     BufferedReader buf = new BufferedReader(in);
                     String response = buf.readLine();
+                    if(response.contentEquals("DB server (version 0.1)")){
+                        response = buf.readLine();
+                    }
                     Response = buf.readLine();
                     socket.close();
                     runOnUiThread(new Runnable() {
@@ -157,21 +157,22 @@ public class LoginActivity extends AppCompatActivity {
                             if (logpass.contentEquals(password)) {
 
                                 //Toast.makeText(this, "Вы ввели неверный пароль", Toast.LENGTH_SHORT).show();
-                                Intent ProductIntent = new Intent(LoginActivity.this, ProductActivity.class);
+                                Intent ProductIntent = new Intent(LoginService.this, ProductService.class);
                                 startActivity(ProductIntent);
                             }
                             else {
-                                Intent ProductIntent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(ProductIntent);
-                                //Toast.makeText(this, "Такого пользователя не существует", Toast.LENGTH_SHORT).show();
+                                //Intent ProductIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                //startActivity(ProductIntent);
+                                Toast.makeText(LoginService.this, "Такого пользователя не существует", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
 
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
-
+                    //ex.printStackTrace();
+                    messageLogin.set("Нет соединения с сервером");
+                    throw new RuntimeException();
                 }
 
             }

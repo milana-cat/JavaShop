@@ -4,44 +4,30 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.webkit.ConsoleMessage;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.Console;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class RegisterActivity extends AppCompatActivity {
+//import javax.swing.*;
+public class RegisterService extends AppCompatActivity {
     public static String host = "82.179.140.18";
     public static int port = 45146;
     public static String password;
     public static String hashpassword;
+    public static AtomicReference<String> message=new AtomicReference<>(" ");
     public static String login;
     public static String username;
 
@@ -53,7 +39,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText usernameInput, passwordInput;
     //private String login;
 
-    public RegisterActivity(){
+    public RegisterService(){
     }
 
     @Override
@@ -78,7 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent MainIntent=new Intent(RegisterActivity.this, MainActivity.class);
+                Intent MainIntent=new Intent(RegisterService.this, MainActivity.class);
                 startActivity(MainIntent);;
             }
         });
@@ -115,14 +101,17 @@ public class RegisterActivity extends AppCompatActivity {
             loadingBar.setMessage("Пожалуйста, подождите...");
             loadingBar.setCanceledOnTouchOutside(false);
             loadingBar.show();
-                try{login();}
+                try{login();Intent MainIntent=new Intent(RegisterService.this, MainActivity.class);
+                    startActivity(MainIntent);}
                 catch (Exception e) {
-                    Toast.makeText(this,"Не удалось создать аккаунт",Toast.LENGTH_SHORT).show();
-                    loadingBar.hide();
+                    //if(message.get().contentEquals(""))
+                      //  message.set("Не удалось создать аккаунт");
+                    Toast.makeText(this, "Не удалось создать аккаунт."+message,Toast.LENGTH_SHORT);
+
                 } ;
             loadingBar.hide();
-            Intent MainIntent=new Intent(RegisterActivity.this, MainActivity.class);
-            startActivity(MainIntent);
+
+
 
 
 
@@ -142,9 +131,14 @@ public class RegisterActivity extends AppCompatActivity {
                     out.flush();
                     InputStreamReader in = new InputStreamReader(socket.getInputStream());
                     BufferedReader buf = new BufferedReader(in);
+                    long count=buf.lines().count();
                     String response = buf.readLine();
-                    //String response2 = buf.readLine();
-                    if(in.toString()=="-1"){
+                    if(count>=2){
+                       response=buf.readLine();
+
+                    }
+                    if(response.contains("-1")){
+                        message=new AtomicReference<>("Такой логин уже существует");
                         throw new RuntimeException() ;
                     }
                     out = new OutputStreamWriter(socket.getOutputStream());
@@ -159,13 +153,16 @@ public class RegisterActivity extends AppCompatActivity {
                     buf = new BufferedReader(in);
                     String response2 = buf.readLine();
                     //String response2 = buf.readLine();
-                    if(in.toString()=="-1"){
+                    if(response2.contentEquals("-1")){
+                        message=new AtomicReference<>("Такой логин уже существует");
                         throw new RuntimeException() ;
                     }
                     socket.close();
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    message.set("Нет соединения с сервером");
+                    throw new RuntimeException();
+                    //ex.printStackTrace();
 
                 }
 
